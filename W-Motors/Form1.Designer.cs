@@ -125,7 +125,7 @@
             // 
             this.tbPasswords.Location = new System.Drawing.Point(539, 122);
             this.tbPasswords.Name = "tbPasswords";
-            this.tbPasswords.Size = new System.Drawing.Size(125, 20);
+            this.tbPasswords.Size = new System.Drawing.Size(145, 20);
             this.tbPasswords.TabIndex = 14;
             this.tbPasswords.UseSystemPasswordChar = true;
             // 
@@ -133,7 +133,7 @@
             // 
             this.tbLogin.Location = new System.Drawing.Point(539, 83);
             this.tbLogin.Name = "tbLogin";
-            this.tbLogin.Size = new System.Drawing.Size(125, 20);
+            this.tbLogin.Size = new System.Drawing.Size(145, 20);
             this.tbLogin.TabIndex = 13;
             // 
             // btnSaveTemplate
@@ -141,7 +141,7 @@
             this.btnSaveTemplate.Location = new System.Drawing.Point(539, 316);
             this.btnSaveTemplate.Margin = new System.Windows.Forms.Padding(2);
             this.btnSaveTemplate.Name = "btnSaveTemplate";
-            this.btnSaveTemplate.Size = new System.Drawing.Size(141, 20);
+            this.btnSaveTemplate.Size = new System.Drawing.Size(145, 20);
             this.btnSaveTemplate.TabIndex = 17;
             this.btnSaveTemplate.Text = "Сохранить шаблон";
             this.btnSaveTemplate.UseVisualStyleBackColor = true;
@@ -166,6 +166,7 @@
             this.Controls.Add(this.rtbMiniText);
             this.Name = "Form1";
             this.Text = "w-motors";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

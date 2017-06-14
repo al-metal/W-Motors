@@ -199,6 +199,12 @@ namespace W_Motors
             }
             return fullText;
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            tbLogin.Text = Properties.Settings.Default.login;
+            tbPasswords.Text = Properties.Settings.Default.password;
+        }
     }
 
 
