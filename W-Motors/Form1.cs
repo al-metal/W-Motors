@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -13,6 +14,14 @@ namespace W_Motors
 {
     public partial class Form1 : Form
     {
+        Thread forms;
+
+        string minitextTemplate;
+        string fullTextTemplate;
+        string keywordsTextTemplate;
+        string titleTextTemplate;
+        string descriptionTextTemplate;
+
         public Form1()
         {
             InitializeComponent();
@@ -89,5 +98,108 @@ namespace W_Motors
             }
             altText.Close();
         }
+
+        private void btnPrice_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.login = tbLogin.Text;
+            Properties.Settings.Default.password = tbPasswords.Text;
+            Properties.Settings.Default.Save();
+
+            minitextTemplate = MinitextStr();
+            fullTextTemplate = FulltextStr();
+            keywordsTextTemplate = tbKeywords.Lines[0].ToString();
+            titleTextTemplate = tbTitle.Lines[0].ToString();
+            descriptionTextTemplate = tbDescription.Lines[0].ToString();
+
+            Thread tabl = new Thread(() => UpdatePrice());
+            forms = tabl;
+            forms.IsBackground = true;
+            forms.Start();
+        }
+
+        private void UpdatePrice()
+        {
+            
+        }
+
+        private void btnSaveTemplate_Click(object sender, EventArgs e)
+        {
+            int count = 0;
+            StreamWriter writers = new StreamWriter("files\\miniText.txt", false, Encoding.GetEncoding(1251));
+            count = rtbMiniText.Lines.Length;
+            for (int i = 0; rtbMiniText.Lines.Length > i; i++)
+            {
+                if (count - 1 == i)
+                {
+                    if (rtbFullText.Lines[i] == "")
+                        break;
+                }
+                writers.WriteLine(rtbMiniText.Lines[i].ToString());
+            }
+            writers.Close();
+
+            writers = new StreamWriter("files\\fullText.txt", false, Encoding.GetEncoding(1251));
+            count = rtbFullText.Lines.Length;
+            for (int i = 0; count > i; i++)
+            {
+                if (count - 1 == i)
+                {
+                    if (rtbFullText.Lines[i] == "")
+                        break;
+                }
+                writers.WriteLine(rtbFullText.Lines[i].ToString());
+            }
+            writers.Close();
+
+            writers = new StreamWriter("files\\title.txt", false, Encoding.GetEncoding(1251));
+            writers.WriteLine(tbTitle.Lines[0]);
+            writers.Close();
+
+            writers = new StreamWriter("files\\description.txt", false, Encoding.GetEncoding(1251));
+            writers.WriteLine(tbDescription.Lines[0]);
+            writers.Close();
+
+            writers = new StreamWriter("files\\keywords.txt", false, Encoding.GetEncoding(1251));
+            writers.WriteLine(tbKeywords.Lines[0]);
+            writers.Close();
+
+            MessageBox.Show("Сохранено");
+        }
+
+        private string MinitextStr()
+        {
+            string minitext = "";
+            for (int z = 0; rtbMiniText.Lines.Length > z; z++)
+            {
+                if (rtbMiniText.Lines[z].ToString() == "")
+                {
+                    minitext += "<p><br /></p>";
+                }
+                else
+                {
+                    minitext += "<p>" + rtbMiniText.Lines[z].ToString() + "</p>";
+                }
+            }
+            return minitext;
+        }
+
+        private string FulltextStr()
+        {
+            string fullText = "";
+            for (int z = 0; rtbFullText.Lines.Length > z; z++)
+            {
+                if (rtbFullText.Lines[z].ToString() == "")
+                {
+                    fullText += "<p><br /></p>";
+                }
+                else
+                {
+                    fullText += "<p>" + rtbFullText.Lines[z].ToString() + "</p>";
+                }
+            }
+            return fullText;
+        }
     }
+
+
 }

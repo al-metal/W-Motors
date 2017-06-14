@@ -35,6 +35,11 @@
             this.rtbMiniText = new System.Windows.Forms.RichTextBox();
             this.btnPrice = new System.Windows.Forms.Button();
             this.btnImages = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tbPasswords = new System.Windows.Forms.TextBox();
+            this.tbLogin = new System.Windows.Forms.TextBox();
+            this.btnSaveTemplate = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // tbKeywords
@@ -87,6 +92,7 @@
             this.btnPrice.TabIndex = 10;
             this.btnPrice.Text = "Обработать прайс";
             this.btnPrice.UseVisualStyleBackColor = true;
+            this.btnPrice.Click += new System.EventHandler(this.btnPrice_Click);
             // 
             // btnImages
             // 
@@ -97,11 +103,60 @@
             this.btnImages.Text = "Обработать картинки";
             this.btnImages.UseVisualStyleBackColor = true;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(539, 106);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(48, 13);
+            this.label2.TabIndex = 16;
+            this.label2.Text = "Пароль:";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(539, 67);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(41, 13);
+            this.label1.TabIndex = 15;
+            this.label1.Text = "Логин:";
+            // 
+            // tbPasswords
+            // 
+            this.tbPasswords.Location = new System.Drawing.Point(539, 122);
+            this.tbPasswords.Name = "tbPasswords";
+            this.tbPasswords.Size = new System.Drawing.Size(125, 20);
+            this.tbPasswords.TabIndex = 14;
+            this.tbPasswords.UseSystemPasswordChar = true;
+            // 
+            // tbLogin
+            // 
+            this.tbLogin.Location = new System.Drawing.Point(539, 83);
+            this.tbLogin.Name = "tbLogin";
+            this.tbLogin.Size = new System.Drawing.Size(125, 20);
+            this.tbLogin.TabIndex = 13;
+            // 
+            // btnSaveTemplate
+            // 
+            this.btnSaveTemplate.Location = new System.Drawing.Point(539, 316);
+            this.btnSaveTemplate.Margin = new System.Windows.Forms.Padding(2);
+            this.btnSaveTemplate.Name = "btnSaveTemplate";
+            this.btnSaveTemplate.Size = new System.Drawing.Size(141, 20);
+            this.btnSaveTemplate.TabIndex = 17;
+            this.btnSaveTemplate.Text = "Сохранить шаблон";
+            this.btnSaveTemplate.UseVisualStyleBackColor = true;
+            this.btnSaveTemplate.Click += new System.EventHandler(this.btnSaveTemplate_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(691, 346);
+            this.Controls.Add(this.btnSaveTemplate);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.tbPasswords);
+            this.Controls.Add(this.tbLogin);
             this.Controls.Add(this.btnImages);
             this.Controls.Add(this.btnPrice);
             this.Controls.Add(this.tbKeywords);
@@ -125,6 +180,11 @@
         private System.Windows.Forms.RichTextBox rtbMiniText;
         private System.Windows.Forms.Button btnPrice;
         private System.Windows.Forms.Button btnImages;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox tbPasswords;
+        private System.Windows.Forms.TextBox tbLogin;
+        private System.Windows.Forms.Button btnSaveTemplate;
     }
 }
 
