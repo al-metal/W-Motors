@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Bike18;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +18,17 @@ namespace W_Motors
     {
         Thread forms;
 
+        nethouse nethouse = new nethouse();
+        WebClient webClient = new WebClient();
+        httpRequest httprequest = new httpRequest();
+
         string minitextTemplate;
         string fullTextTemplate;
         string keywordsTextTemplate;
         string titleTextTemplate;
         string descriptionTextTemplate;
+
+        string fileUrls;
 
         public Form1()
         {
@@ -111,6 +119,17 @@ namespace W_Motors
             titleTextTemplate = tbTitle.Lines[0].ToString();
             descriptionTextTemplate = tbDescription.Lines[0].ToString();
 
+            fileUrls = "";
+            ofdLoadPrice.ShowDialog();
+
+            fileUrls = ofdLoadPrice.FileName.ToString();
+
+            if (ofdLoadPrice.FileName == "openFileDialog1" || ofdLoadPrice.FileName == "")
+            {
+                MessageBox.Show("Ошибка при выборе файла", "Ошибка файла");
+                return;
+            }
+
             Thread tabl = new Thread(() => UpdatePrice());
             forms = tabl;
             forms.IsBackground = true;
@@ -119,7 +138,15 @@ namespace W_Motors
 
         private void UpdatePrice()
         {
-            
+            string l = tbLogin.Text;
+            string p = tbPasswords.Text;
+            CookieContainer cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
+            if (cookie.Count == 1)
+            {
+                MessageBox.Show("Логин или пароль для сайта введены не верно", "Ошибка логина/пароля");
+                return;
+            }
+
         }
 
         private void btnSaveTemplate_Click(object sender, EventArgs e)

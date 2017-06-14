@@ -40,6 +40,7 @@
             this.tbPasswords = new System.Windows.Forms.TextBox();
             this.tbLogin = new System.Windows.Forms.TextBox();
             this.btnSaveTemplate = new System.Windows.Forms.Button();
+            this.ofdLoadPrice = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // tbKeywords
@@ -147,6 +148,11 @@
             this.btnSaveTemplate.UseVisualStyleBackColor = true;
             this.btnSaveTemplate.Click += new System.EventHandler(this.btnSaveTemplate_Click);
             // 
+            // ofdLoadPrice
+            // 
+            this.ofdLoadPrice.FileName = "ofdOpenPrice";
+            this.ofdLoadPrice.Filter = "Excel|*.xlsx";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -186,6 +192,7 @@
         private System.Windows.Forms.TextBox tbPasswords;
         private System.Windows.Forms.TextBox tbLogin;
         private System.Windows.Forms.Button btnSaveTemplate;
+        private System.Windows.Forms.OpenFileDialog ofdLoadPrice;
     }
 }
 
