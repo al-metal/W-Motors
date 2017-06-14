@@ -1,4 +1,6 @@
 ﻿using Bike18;
+using OfficeOpenXml;
+using RacerMotors;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +23,7 @@ namespace W_Motors
         nethouse nethouse = new nethouse();
         WebClient webClient = new WebClient();
         httpRequest httprequest = new httpRequest();
+        FileEdit files = new FileEdit();
 
         string minitextTemplate;
         string fullTextTemplate;
@@ -147,6 +150,23 @@ namespace W_Motors
                 return;
             }
 
+            File.Delete("naSite.csv");
+            CreateCSV(cookie);
+
+        }
+
+        private void CreateCSV(CookieContainer cookie)
+        {
+            List<string> newProduct = newList();
+
+            FileInfo file = new FileInfo(fileUrls);
+            ExcelPackage p = new ExcelPackage(file);
+            ExcelWorksheet w = p.Workbook.Worksheets[1];
+            int q = w.Dimension.Rows;
+            for (int i = 10; q > i; i++)
+            {
+
+            }
         }
 
         private void btnSaveTemplate_Click(object sender, EventArgs e)
@@ -231,6 +251,32 @@ namespace W_Motors
         {
             tbLogin.Text = Properties.Settings.Default.login;
             tbPasswords.Text = Properties.Settings.Default.password;
+        }
+
+        private List<string> newList()
+        {
+            List<string> newProduct = new List<string>();
+            newProduct.Add("id");                                                                               //id
+            newProduct.Add("Артикул *");                                                 //артикул
+            newProduct.Add("Название товара *");                                          //название
+            newProduct.Add("Стоимость товара *");                                    //стоимость
+            newProduct.Add("Стоимость со скидкой");                                       //со скидкой
+            newProduct.Add("Раздел товара *");                                         //раздел товара
+            newProduct.Add("Товар в наличии *");                                                    //в наличии
+            newProduct.Add("Поставка под заказ *");                                                 //поставка
+            newProduct.Add("Срок поставки (дни) *");                                           //срок поставки
+            newProduct.Add("Краткий текст");                                 //краткий текст
+            newProduct.Add("Текст полностью");                                          //полностью текст
+            newProduct.Add("Заголовок страницы (title)");                               //заголовок страницы
+            newProduct.Add("Описание страницы (description)");                                 //описание
+            newProduct.Add("Ключевые слова страницы (keywords)");                                 //ключевые слова
+            newProduct.Add("ЧПУ страницы (slug)");                                   //ЧПУ
+            newProduct.Add("С этим товаром покупают");                              //с этим товаром покупают
+            newProduct.Add("Рекламные метки");
+            newProduct.Add("Показывать на сайте *");                                           //показывать
+            newProduct.Add("Удалить *");                                    //удалить
+            files.fileWriterCSV(newProduct, "naSite");
+            return newProduct;
         }
     }
 
