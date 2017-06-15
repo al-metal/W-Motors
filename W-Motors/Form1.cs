@@ -33,6 +33,7 @@ namespace W_Motors
         string descriptionTextTemplate;
 
         string fileUrls;
+        string descriptionTovarWW;
 
         public Form1()
         {
@@ -185,6 +186,7 @@ namespace W_Motors
                         continue;
                     string article = (string)w.Cells[i, 3].Value;
                     string name = (string)w.Cells[i, 5].Value;
+                    descriptionTovarWW = "";
 
                     string price = ReturnPrice(name, article);
                 }
@@ -204,6 +206,7 @@ namespace W_Motors
                 otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
                 string tovarCart = new Regex("<h1>[\\w\\W]*?(?=Заказ отсутствующих в каталоге товаров)").Match(otv).ToString();
                 price = new Regex("(?<=\"><span>).*?(?=</span>)").Match(tovarCart).ToString();
+                descriptionTovarWW = new Regex("(?<=<div class=\"product-detail-text\">)[\\w\\W]*?(?=</div>)").Match(tovarCart).ToString();
             }
             else
             {
