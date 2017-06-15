@@ -158,14 +158,34 @@ namespace W_Motors
         private void CreateCSV(CookieContainer cookie)
         {
             List<string> newProduct = newList();
+            string razdelCSV = "";
+            string miniRazdelCSV = "";
 
             FileInfo file = new FileInfo(fileUrls);
             ExcelPackage p = new ExcelPackage(file);
             ExcelWorksheet w = p.Workbook.Worksheets[1];
             int q = w.Dimension.Rows;
-            for (int i = 10; q > i; i++)
+            for (int i = 9; q > i; i++)
             {
-
+                if (w.Cells[i, 3].Value == null && w.Cells[i, 2].Value == null)
+                {
+                    i++;
+                    razdelCSV = (string)w.Cells[i, 2].Value;
+                    razdelCSV = razdelCSV.Trim();
+                }
+                else if(w.Cells[i, 3].Value == null)
+                {
+                    miniRazdelCSV = (string)w.Cells[i, 2].Value;
+                    miniRazdelCSV = razdelCSV.Trim();
+                }
+                else
+                {
+                    if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == " Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" ||
+                        razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == " ЛАМПЫ")
+                        continue;
+                     string article = (string)w.Cells[i, 3].Value;
+                    string name = (string)w.Cells[i, 5].Value;
+                }
             }
         }
 
