@@ -14,7 +14,7 @@ namespace Bike18
         {
             HttpWebResponse res = null;
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-            req.Proxy = null;
+            //req.Proxy = null;
             req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
             req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0";
             res = (HttpWebResponse)req.GetResponse();
@@ -48,7 +48,7 @@ namespace Bike18
             req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0";
             req.CookieContainer = cookie;
             res = (HttpWebResponse)req.GetResponse();
-            StreamReader ressr = new StreamReader(res.GetResponseStream());
+            StreamReader ressr = new StreamReader(res.GetResponseStream(), Encoding.GetEncoding(1251));
             string otv = ressr.ReadToEnd();
             res.GetResponseStream().Close();
             req.GetResponse().Close();

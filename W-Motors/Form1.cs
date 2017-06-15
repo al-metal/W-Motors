@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -173,20 +174,43 @@ namespace W_Motors
                     razdelCSV = (string)w.Cells[i, 2].Value;
                     razdelCSV = razdelCSV.Trim();
                 }
-                else if(w.Cells[i, 3].Value == null)
+                else if (w.Cells[i, 3].Value == null)
                 {
                     miniRazdelCSV = (string)w.Cells[i, 2].Value;
                     miniRazdelCSV = razdelCSV.Trim();
                 }
                 else
                 {
-                    if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == " Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" ||
-                        razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == " ЛАМПЫ")
+                    if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == " Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" || razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == " ЛАМПЫ")
                         continue;
-                     string article = (string)w.Cells[i, 3].Value;
+                    string article = (string)w.Cells[i, 3].Value;
                     string name = (string)w.Cells[i, 5].Value;
+
+                    string price = ReturnPrice(name, article);
                 }
             }
+        }
+
+        private string ReturnPrice(string name, string article)
+        {
+            string price = "";
+            CookieContainer cookieWW = httprequest.webCookie("http://w-motors.ru/");
+            string otv = getRequestEncod(cookieWW, "http://w-motors.ru/search/?q=" + name + "&amp;s=%CF%EE%E8%F1%EA", name);
+            string urlTovarWW = new Regex("(?<=a href=\")/catalog[\\w\\W]*?(?=\">)").Match(otv).ToString();
+            string nameTovarWW = new Regex("(?<=\">)<b>[\\w\\W]*?(?=</td>)").Match(otv).ToString();
+            nameTovarWW = nameTovarWW.Replace("<b>", "").Replace("</b>", "").Replace("&quot;", "\"");
+            if (name == nameTovarWW)
+            {
+                otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+                string tovarCart = new Regex("<h1>[\\w\\W]*?(?=Заказ отсутствующих в каталоге товаров)").Match(otv).ToString();
+                price = new Regex("(?<=\"><span>).*?(?=</span>)").Match(tovarCart).ToString();
+            }
+            else
+            {
+
+            }
+
+            return price;
         }
 
         private void btnSaveTemplate_Click(object sender, EventArgs e)
@@ -297,6 +321,30 @@ namespace W_Motors
             newProduct.Add("Удалить *");                                    //удалить
             files.fileWriterCSV(newProduct, "naSite");
             return newProduct;
+        }
+
+        public string getRequestEncod(CookieContainer cookie, string url, string name)
+        {
+            string otv = "";
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
+            req.Accept = "*/*";
+            req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.CookieContainer = cookie;
+            string request = "ajax_call=y&INPUT_ID=title-search-input&q=" + name;
+
+            byte[] ms = System.Text.Encoding.GetEncoding("utf-8").GetBytes(request);
+            req.ContentLength = ms.Length;
+            Stream stre = req.GetRequestStream();
+            stre.Write(ms, 0, ms.Length);
+            stre.Close();
+            HttpWebResponse res1 = (HttpWebResponse)req.GetResponse();
+            StreamReader ressr1 = new StreamReader(res1.GetResponseStream(), Encoding.GetEncoding(1251));
+            otv = ressr1.ReadToEnd();
+            res1.Close();
+
+            return otv;
         }
     }
 
