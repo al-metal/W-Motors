@@ -110,7 +110,7 @@ namespace Формирование_ЧПУ
             }
 
             vyhod = vyhod.ToLower();
-            vyhod = new Regex("[-.?!)(,:]").Replace(vyhod, "-").Replace("--", "-").Replace("---", "-").Replace("-----", "-").Replace("&", "").Replace("\"", "").Replace("=", "").Replace("*", "").Replace("+", "").Replace("(", "").Replace(")", "").Replace("<", "").Replace(">", "").Replace("^", "").Replace("\\", "").Replace("/", "").Replace("'", "").Replace("`", "").Replace("$", "").Replace("°", "").Replace(";", "").Replace("«", "").Replace("»", "").Replace("№", "").Replace("_", "");
+            vyhod = new Regex("[-.?!)(,:]").Replace(vyhod, "-").Replace("--", "-").Replace("---", "-").Replace("-----", "-").Replace("&", "").Replace("\"", "").Replace("=", "").Replace("*", "").Replace("+", "").Replace("(", "").Replace(")", "").Replace("<", "").Replace(">", "").Replace("^", "").Replace("\\", "").Replace("/", "").Replace("'", "").Replace("`", "").Replace("$", "").Replace("°", "").Replace(";", "").Replace("«", "").Replace("»", "").Replace("№", "").Replace("_", "").Replace(" ", "-");
 
             words.Clear();
             vyhod = vyhod.Replace("--", "-").Replace("---", "-").Replace("-----", "-").Replace("&", "").Replace("\"", "").Replace("=", "").Replace("*", "").Replace("+", "").Replace("(", "").Replace(")", "").Replace("<", "").Replace(">", "").Replace("^", "").Replace("\\", "").Replace("/", "").Replace("'", "").Replace("`", "").Replace("$", "").Replace("°", "").Replace(";", "").Replace("«", "").Replace("»", "").Replace("№", "").Replace("_", "").Replace("?", "");
