@@ -37,6 +37,8 @@ namespace W_Motors
         string boldOpen = "<span style=\"\"font-weight: bold; font-weight: bold; \"\">";
         string boldClose = "</span>";
 
+        List<string> newProduct = new List<string>();
+
         string fileUrls;
         string descriptionTovarWW;
 
@@ -194,21 +196,90 @@ namespace W_Motors
                     string name = (string)w.Cells[i, 5].Value;
 
                     List<string> tovarWW = GetTovarWW(article, name);
+
+                    string resultSearch = SearchInBike18(tovarWW);
+                    if (resultSearch == null || resultSearch == "")
+                    {
+                        WriteTovarInCSV(tovarWW);
+                    }
+                    else
+                    {
+                        //обновить цену
+                    }
                 }
             }
+        }
+
+        private void WriteTovarInCSV(List<string> tovarMotoPiter)
+        {
+            string nameTovar = tovarMotoPiter[0].ToString();
+            string article = tovarMotoPiter[1].ToString();
+            string price = tovarMotoPiter[2].ToString();
+            string categoryTovar = tovarMotoPiter[3].ToString();
+            string slug = tovarMotoPiter[4].ToString();
+            string titleText = tovarMotoPiter[5].ToString();
+            string descriptionText = tovarMotoPiter[6].ToString();
+            string keywordsText = tovarMotoPiter[7].ToString();
+            string minitext = tovarMotoPiter[8].ToString();
+            string fullText = tovarMotoPiter[9].ToString();
+
+            newProduct = new List<string>();
+            newProduct.Add(""); //id
+            newProduct.Add("\"" + article + "\""); //артикул
+            newProduct.Add("\"" + nameTovar + "\"");  //название
+            newProduct.Add("\"" + price + "\""); //стоимость
+            newProduct.Add("\"" + "" + "\""); //со скидкой
+            newProduct.Add("\"" + categoryTovar + "\""); //раздел товара
+            newProduct.Add("\"" + "100" + "\""); //в наличии
+            newProduct.Add("\"" + "0" + "\"");//поставка
+            newProduct.Add("\"" + "1" + "\"");//срок поставки
+            newProduct.Add("\"" + minitext + "\"");//краткий текст
+            newProduct.Add("\"" + fullText + "\"");//полностью текст
+            newProduct.Add("\"" + titleText + "\""); //заголовок страницы
+            newProduct.Add("\"" + descriptionText + "\""); //описание
+            newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
+            newProduct.Add("\"" + slug + "\""); //ЧПУ
+            newProduct.Add(""); //с этим товаром покупают
+            newProduct.Add("");   //рекламные метки
+            newProduct.Add("\"" + "1" + "\"");  //показывать
+            newProduct.Add("\"" + "0" + "\""); //удалить
+
+            files.fileWriterCSV(newProduct, "naSite");
         }
 
         private List<string> GetTovarWW(string article, string name)
         {
             List<string> tovarWW = new List<string>();
 
-            string razdel = "";
-            string miniText = "";
-            string fullText = "";
+            CookieContainer cookieWW = httprequest.webCookie("http://w-motors.ru/");
+            string otv = getRequestEncod(cookieWW, "http://w-motors.ru/search/?q=" + name + "&amp;s=%CF%EE%E8%F1%EA", name);
+            string urlTovarWW = new Regex("(?<=a href=\")/catalog[\\w\\W]*?(?=\">)").Match(otv).ToString();
+            string nameTovarWW = new Regex("(?<=\">)<b>[\\w\\W]*?(?=</td>)").Match(otv).ToString();
+            nameTovarWW = nameTovarWW.Replace("<b>", "").Replace("</b>", "").Replace("&quot;", "\"");
+            if (name == nameTovarWW)
+            {
+                otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+            }
+            else
+            {
+                otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+            }
+
+                string razdel = "";
+            string miniText = minitextTemplate;
+            string fullText = fullTextTemplate;
             razdel = ReturnRazdel();
 
             descriptionTovarWW = "";
-            string price = ReturnPrice(name, article);
+            descriptionTovarWW = new Regex("(?<=<div class=\"product-detail-text\">)[\\w\\W]*?(?=</div>)").Match(otv).ToString();
+            MatchCollection ampersant = new Regex("&.*?;").Matches(descriptionTovarWW);
+            foreach(Match str in ampersant)
+            {
+                string s = str.ToString();
+                descriptionTovarWW = descriptionTovarWW.Replace(s, "");
+            }
+            
+            string price = ReturnPrice(name, article, otv);
 
             article = "WM_" + article;
             article = ReturnArticle(article);
@@ -242,6 +313,30 @@ namespace W_Motors
             tovarWW.Add(fullText);
 
             return tovarWW;
+        }
+
+        private string SearchInBike18(List<string> tovarWW)
+        {
+            string urlTovar = "";
+
+            string nameTovar = tovarWW[0].ToString();
+            string articles = tovarWW[1].ToString();
+            string[] article = articles.Split(';');
+
+            foreach (string str in article)
+            {
+                string search = "";
+                if (urlTovar == "" || urlTovar == null)
+                {
+                    search = nethouse.searchTovar(nameTovar, str);
+                    if (search != null)
+                    {
+                        urlTovar = urlTovar + ";" + search;
+                    }
+                }
+            }
+
+            return urlTovar;
         }
 
         private string Replace(string text, string nameTovar, string article)
@@ -352,25 +447,13 @@ namespace W_Motors
             return category;
         }
 
-        private string ReturnPrice(string name, string article)
+        private string ReturnPrice(string name, string article, string otv)
         {
             string price = "";
-            CookieContainer cookieWW = httprequest.webCookie("http://w-motors.ru/");
-            string otv = getRequestEncod(cookieWW, "http://w-motors.ru/search/?q=" + name + "&amp;s=%CF%EE%E8%F1%EA", name);
-            string urlTovarWW = new Regex("(?<=a href=\")/catalog[\\w\\W]*?(?=\">)").Match(otv).ToString();
-            string nameTovarWW = new Regex("(?<=\">)<b>[\\w\\W]*?(?=</td>)").Match(otv).ToString();
-            nameTovarWW = nameTovarWW.Replace("<b>", "").Replace("</b>", "").Replace("&quot;", "\"");
-            if (name == nameTovarWW)
-            {
-                otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+            
                 string tovarCart = new Regex("<h1>[\\w\\W]*?(?=Заказ отсутствующих в каталоге товаров)").Match(otv).ToString();
                 price = new Regex("(?<=\"><span>).*?(?=</span>)").Match(tovarCart).ToString();
-                descriptionTovarWW = new Regex("(?<=<div class=\"product-detail-text\">)[\\w\\W]*?(?=</div>)").Match(tovarCart).ToString();
-            }
-            else
-            {
-
-            }
+            price = price.Replace(" ", "");
 
             return price;
         }
