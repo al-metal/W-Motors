@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Формирование_ЧПУ;
 
 namespace W_Motors
 {
@@ -25,12 +26,16 @@ namespace W_Motors
         WebClient webClient = new WebClient();
         httpRequest httprequest = new httpRequest();
         FileEdit files = new FileEdit();
+        CHPU chpu = new CHPU();
 
         string minitextTemplate;
         string fullTextTemplate;
         string keywordsTextTemplate;
         string titleTextTemplate;
         string descriptionTextTemplate;
+        string razdelCSV = "";
+        string boldOpen = "<span style=\"\"font-weight: bold; font-weight: bold; \"\">";
+        string boldClose = "</span>";
 
         string fileUrls;
         string descriptionTovarWW;
@@ -160,9 +165,9 @@ namespace W_Motors
         private void CreateCSV(CookieContainer cookie)
         {
             List<string> newProduct = newList();
-            string razdelCSV = "";
+            razdelCSV = "";
             string miniRazdelCSV = "";
-
+           
             FileInfo file = new FileInfo(fileUrls);
             ExcelPackage p = new ExcelPackage(file);
             ExcelWorksheet w = p.Workbook.Worksheets[1];
@@ -182,15 +187,169 @@ namespace W_Motors
                 }
                 else
                 {
-                    if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == " Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" || razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == " ЛАМПЫ")
+                    if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == "Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" || razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == "ЛАМПЫ")
                         continue;
+                    
                     string article = (string)w.Cells[i, 3].Value;
                     string name = (string)w.Cells[i, 5].Value;
-                    descriptionTovarWW = "";
 
-                    string price = ReturnPrice(name, article);
+                    List<string> tovarWW = GetTovarWW(article, name);
                 }
             }
+        }
+
+        private List<string> GetTovarWW(string article, string name)
+        {
+            List<string> tovarWW = new List<string>();
+
+            string razdel = "";
+            string miniText = "";
+            string fullText = "";
+            razdel = ReturnRazdel();
+
+            descriptionTovarWW = "";
+            string price = ReturnPrice(name, article);
+
+            article = "WM_" + article;
+            article = ReturnArticle(article);
+
+            string slug = chpu.vozvr(name);
+
+            string descriptionText = descriptionTextTemplate;
+            string titleText = titleTextTemplate;
+            string keywordsText = keywordsTextTemplate;
+
+            titleText = ReplaceSEO("title", titleText, name, article.Replace(";", " "));
+            descriptionText = ReplaceSEO("description", descriptionText, name, article);
+            keywordsText = ReplaceSEO("keywords", keywordsText, name, article);
+
+            miniText = Replace(miniText, name, article);
+            miniText = miniText.Remove(miniText.LastIndexOf("<p>"));
+
+            fullText = Replace(fullText, name, article);
+            fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
+            fullText = "<p>" + descriptionTovarWW + "</p><p></p>" + fullText;
+
+            tovarWW.Add(name);
+            tovarWW.Add(article);
+            tovarWW.Add(price);
+            tovarWW.Add(razdel);
+            tovarWW.Add(slug);
+            tovarWW.Add(titleText);
+            tovarWW.Add(descriptionText);
+            tovarWW.Add(keywordsText);
+            tovarWW.Add(miniText);
+            tovarWW.Add(fullText);
+
+            return tovarWW;
+        }
+
+        private string Replace(string text, string nameTovar, string article)
+        {
+            string discount = Discount();
+            string nameText = boldOpen + nameTovar + boldClose;
+            text = text.Replace("СКИДКА", discount).Replace("НАЗВАНИЕ", nameText).Replace("АРТИКУЛ", article).Replace("<p><br /></p><p><br /></p><p><br /></p><p>", "<p><br /></p>");
+            return text;
+        }
+
+        private string Discount()
+        {
+            string discount = "<p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> Сделай ТРОЙНОЙ удар по нашим ценам! </span></p><p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> 1. <a target=\"\"_blank\"\" href =\"\"http://bike18.ru/stock\"\"> Скидки за отзывы о товарах!</a> </span></p><p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> 2. <a target=\"\"_blank\"\" href =\"\"http://bike18.ru/stock\"\"> Друзьям скидки и подарки!</a> </span></p><p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> 3. <a target=\"\"_blank\"\" href =\"\"http://bike18.ru/stock\"\"> Нашли дешевле!? 110% разницы Ваши!</a></span></p>";
+            return discount;
+        }
+
+        private string ReturnArticle(string article)
+        {
+            article = article.Replace("!", "_").Replace("@", "_").Replace("#", "_").Replace("$", "_").Replace("%", "_").Replace("^", "_").Replace("&", "_").Replace("*", "_").Replace("(", "_").Replace(")", "_").Replace("-", "_").Replace("+", "_").Replace("=", "_").Replace("/", "_").Replace("\\", "_").Replace("---", "_").Replace("___", "_").Replace("__", "_");
+
+            return article;
+        }
+
+        private string ReturnRazdel()
+        {
+            string categoryName = "";
+
+            switch (razdelCSV)
+            {
+                case "Бензо Генераторы, Мотопомпы":
+                    categoryName = "Бензогенераторы, Мотопомпы";
+                    break;
+                case "Двигатели LIFAN (Запчасти)":
+                    categoryName = "Двигатели";
+                    break;
+                case "Двигатели в сборе универсальные (LIFAN, BASHAN, CHAMPION)":
+                    categoryName = "Двигатели";
+                    break;
+                case "Лодки":
+                    categoryName = "Лодки и лодочные двигатели";
+                    break;
+                case "Лодочные двигатели":
+                    categoryName = "Лодки и лодочные двигатели";
+                    break;
+                case "Мотокультиваторы, Мотоблоки, Минитракторы  ЗИП":
+                    categoryName = "Запчасти мотокультиваторы, мотоблоки, минитрактора";
+                    break;
+                case "Подшипники":
+                    categoryName = "Подшипники";
+                    break;
+                case "СВЕЧИ":
+                    categoryName = "Свечи";
+                    break;
+                case "Скутера, Мопеды, Мотоциклы, ATV (импорт) ЗиП":
+                    categoryName = "мопеды и мотоциклы китайского п-ва";
+                    break;
+                case "Снегоуборочные машины":
+                    categoryName = "Снегоуборочные машины";
+                    break;
+                case "Снегоход Буран":
+                    categoryName = "Отечественные снегоходы";
+                    break;
+                case "Снегоход Рысь":
+                    categoryName = "Отечественные снегоходы";
+                    break;
+                case "Снегоход Тайга":
+                    categoryName = "Отечественные снегоходы";
+                    break;
+                case "Урал":
+                    categoryName = "Днепр, МТ, урал";
+                    break;
+                case "Днепр, МТ":
+                    categoryName = "Днепр, МТ, урал";
+                    break;
+                case "Ява":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Муравей, Тула":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Минск":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Минск, Восход, Сова - ЗиП":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Мопед, Веломотор, ЗиД50":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Иж Планета":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Иж Юпитер":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Иж Юпитер, Иж Планета":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                case "Восход, Сова":
+                    categoryName = "Запчасти и расходники для отечественной (советской) мототехники";
+                    break;
+                default:
+                    break;
+            }
+
+            string category = "Запчасти и расходники => Каталог запчастей и расходников BIKE18.RU => " + categoryName;
+
+            return category;
         }
 
         private string ReturnPrice(string name, string article)
@@ -348,6 +507,39 @@ namespace W_Motors
             res1.Close();
 
             return otv;
+        }
+
+        private string ReplaceSEO(string nameSEO, string text, string nameTovar, string article)
+        {
+            text = text.Replace("НАЗВАНИЕ", nameTovar).Replace("АРТИКУЛ", article);
+
+            switch (nameSEO)
+            {
+                case "title":
+                    text = RemoveText(text, 255);
+                    break;
+                case "description":
+                    text = RemoveText(text, 200);
+                    break;
+                case "keywords":
+                    text = RemoveText(text, 100);
+                    break;
+                default:
+                    text = RemoveText(text, 100);
+                    break;
+            }
+
+            return text;
+        }
+
+        private string RemoveText(string text, int v)
+        {
+            if (text.Length > v)
+            {
+                text = text.Remove(v);
+                text = text.Remove(text.LastIndexOf(" "));
+            }
+            return text;
         }
     }
 
