@@ -166,6 +166,9 @@ namespace W_Motors
 
         private void CreateCSV(CookieContainer cookie)
         {
+            ControlsFormEnabledFalse();
+
+            File.Delete("naSite.csv");
             List<string> newProduct = newList();
             razdelCSV = "";
             string miniRazdelCSV = "";
@@ -208,6 +211,8 @@ namespace W_Motors
                     }
                 }
             }
+
+            ControlsFormEnabledTrue();
         }
 
         private void WriteTovarInCSV(List<string> tovarMotoPiter)
@@ -623,6 +628,34 @@ namespace W_Motors
                 text = text.Remove(text.LastIndexOf(" "));
             }
             return text;
+        }
+
+        private void ControlsFormEnabledFalse()
+        {
+            btnPrice.Invoke(new Action(() => btnPrice.Enabled = false));
+            btnImages.Invoke(new Action(() => btnImages.Enabled = false));
+            btnSaveTemplate.Invoke(new Action(() => btnSaveTemplate.Enabled = false));
+            rtbFullText.Invoke(new Action(() => rtbFullText.Enabled = false));
+            rtbMiniText.Invoke(new Action(() => rtbMiniText.Enabled = false));
+            tbDescription.Invoke(new Action(() => tbDescription.Enabled = false));
+            tbKeywords.Invoke(new Action(() => tbKeywords.Enabled = false));
+            tbTitle.Invoke(new Action(() => tbTitle.Enabled = false));
+            tbLogin.Invoke(new Action(() => tbLogin.Enabled = false));
+            tbPasswords.Invoke(new Action(() => tbPasswords.Enabled = false));
+        }
+
+        private void ControlsFormEnabledTrue()
+        {
+            btnPrice.Invoke(new Action(() => btnPrice.Enabled = true));
+            btnImages.Invoke(new Action(() => btnImages.Enabled = true));
+            btnSaveTemplate.Invoke(new Action(() => btnSaveTemplate.Enabled = true));
+            rtbFullText.Invoke(new Action(() => rtbFullText.Enabled = true));
+            rtbMiniText.Invoke(new Action(() => rtbMiniText.Enabled = true));
+            tbDescription.Invoke(new Action(() => tbDescription.Enabled = true));
+            tbKeywords.Invoke(new Action(() => tbKeywords.Enabled = true));
+            tbTitle.Invoke(new Action(() => tbTitle.Enabled = true));
+            tbLogin.Invoke(new Action(() => tbLogin.Enabled = false));
+            tbPasswords.Invoke(new Action(() => tbPasswords.Enabled = false));
         }
     }
 
