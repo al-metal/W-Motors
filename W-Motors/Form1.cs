@@ -172,7 +172,7 @@ namespace W_Motors
             List<string> newProduct = newList();
             razdelCSV = "";
             string miniRazdelCSV = "";
-           
+
             FileInfo file = new FileInfo(fileUrls);
             ExcelPackage p = new ExcelPackage(file);
             ExcelWorksheet w = p.Workbook.Worksheets[1];
@@ -194,11 +194,12 @@ namespace W_Motors
                 {
                     if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == "Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" || razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == "ЛАМПЫ")
                         continue;
-                    
+
                     string article = (string)w.Cells[i, 3].Value;
                     string name = (string)w.Cells[i, 5].Value;
+                    double price = (double)w.Cells[i, 9].Value;
 
-                    List<string> tovarWW = GetTovarWW(article, name);
+                    List<string> tovarWW = GetTovarWW(article, name, price);
 
                     string resultSearch = SearchInBike18(tovarWW);
                     if (resultSearch == null || resultSearch == "")
@@ -252,7 +253,7 @@ namespace W_Motors
             files.fileWriterCSV(newProduct, "naSite");
         }
 
-        private List<string> GetTovarWW(string article, string name)
+        private List<string> GetTovarWW(string article, string name, double priceWW)
         {
             List<string> tovarWW = new List<string>();
 
@@ -270,7 +271,9 @@ namespace W_Motors
                 otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
             }
 
-                string razdel = "";
+            name = name.Replace("\"", "");
+
+            string razdel = "";
             string miniText = minitextTemplate;
             string fullText = fullTextTemplate;
             razdel = ReturnRazdel();
@@ -278,13 +281,18 @@ namespace W_Motors
             descriptionTovarWW = "";
             descriptionTovarWW = new Regex("(?<=<div class=\"product-detail-text\">)[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             MatchCollection ampersant = new Regex("&.*?;").Matches(descriptionTovarWW);
-            foreach(Match str in ampersant)
+            foreach (Match str in ampersant)
             {
                 string s = str.ToString();
                 descriptionTovarWW = descriptionTovarWW.Replace(s, "");
             }
-            
+
             string price = ReturnPrice(name, article, otv);
+
+            if(price == "")
+            {
+                price = priceWW.ToString();
+            }
 
             article = "WM_" + article;
             article = ReturnArticle(article);
@@ -304,7 +312,8 @@ namespace W_Motors
 
             fullText = Replace(fullText, name, article);
             fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
-            fullText = "<p>" + descriptionTovarWW + "</p><p></p>" + fullText;
+            if(descriptionTovarWW != "")
+                fullText = "<p>" + descriptionTovarWW + "</p><p></p>" + fullText;
 
             tovarWW.Add(name);
             tovarWW.Add(article);
@@ -455,9 +464,9 @@ namespace W_Motors
         private string ReturnPrice(string name, string article, string otv)
         {
             string price = "";
-            
-                string tovarCart = new Regex("<h1>[\\w\\W]*?(?=Заказ отсутствующих в каталоге товаров)").Match(otv).ToString();
-                price = new Regex("(?<=\"><span>).*?(?=</span>)").Match(tovarCart).ToString();
+
+            string tovarCart = new Regex("<h1>[\\w\\W]*?(?=Заказ отсутствующих в каталоге товаров)").Match(otv).ToString();
+            price = new Regex("(?<=\"><span>).*?(?=</span>)").Match(tovarCart).ToString();
             price = price.Replace(" ", "");
 
             return price;
@@ -625,7 +634,10 @@ namespace W_Motors
             if (text.Length > v)
             {
                 text = text.Remove(v);
-                text = text.Remove(text.LastIndexOf(" "));
+                if (text.Contains(" "))
+                    text = text.Remove(text.LastIndexOf(" "));
+                else
+                    text = text.Remove(text.LastIndexOf(" "));
             }
             return text;
         }
