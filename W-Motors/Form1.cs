@@ -173,12 +173,15 @@ namespace W_Motors
             razdelCSV = "";
             string miniRazdelCSV = "";
 
+            int countTovars = 0;
+
             FileInfo file = new FileInfo(fileUrls);
             ExcelPackage p = new ExcelPackage(file);
             ExcelWorksheet w = p.Workbook.Worksheets[1];
             int q = w.Dimension.Rows;
             for (int i = 9; q > i; i++)
             {
+                countTovars++;
                 if (w.Cells[i, 3].Value == null && w.Cells[i, 2].Value == null)
                 {
                     i++;
@@ -210,6 +213,12 @@ namespace W_Motors
                     {
                         //обновить цену
                     }
+                }
+                if(countTovars == 1000)
+                {
+                    cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
+                    UploadCSVInNethoise(cookie);
+                    countTovars = 0;
                 }
             }
 
