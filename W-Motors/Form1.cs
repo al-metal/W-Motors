@@ -213,7 +213,17 @@ namespace W_Motors
                 }
             }
 
+            cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
+            UploadCSVInNethoise(cookie);
+
             ControlsFormEnabledTrue();
+        }
+
+        private void UploadCSVInNethoise(CookieContainer cookie)
+        {
+            string[] naSite1 = File.ReadAllLines("naSite.csv", Encoding.GetEncoding(1251));
+            if (naSite1.Length > 1)
+                nethouse.UploadCSVNethouse(cookie, "naSite.csv");
         }
 
         private void WriteTovarInCSV(List<string> tovarMotoPiter)
@@ -271,7 +281,7 @@ namespace W_Motors
                 otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
             }
 
-            name = name.Replace("\"", "");
+            name = name.Replace("\"", "").Replace("\r", "").Replace("\n", "");
 
             string razdel = "";
             string miniText = minitextTemplate;
@@ -284,8 +294,9 @@ namespace W_Motors
             foreach (Match str in ampersant)
             {
                 string s = str.ToString();
-                descriptionTovarWW = descriptionTovarWW.Replace(s, "");
+                descriptionTovarWW = descriptionTovarWW.Replace(s, "").Replace("\"", "");
             }
+            descriptionTovarWW = descriptionTovarWW.Replace("\n", "").Replace("\t", "");
 
             string price = ReturnPrice(name, article, otv);
 
@@ -312,7 +323,7 @@ namespace W_Motors
 
             fullText = Replace(fullText, name, article);
             fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
-            if(descriptionTovarWW != "")
+            if(descriptionTovarWW != "\n\t" && descriptionTovarWW != "" && !descriptionTovarWW.Contains("https://") && !descriptionTovarWW.Contains("http://"))
                 fullText = "<p>" + descriptionTovarWW + "</p><p></p>" + fullText;
 
             tovarWW.Add(name);
