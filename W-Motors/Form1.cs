@@ -181,7 +181,7 @@ namespace W_Motors
             int q = w.Dimension.Rows;
             for (int i = 9; q > i; i++)
             {
-                countTovars++;
+                
                 if (w.Cells[i, 3].Value == null && w.Cells[i, 2].Value == null)
                 {
                     i++;
@@ -198,6 +198,7 @@ namespace W_Motors
                     if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == "Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" || razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == "ЛАМПЫ")
                         continue;
 
+                    countTovars++;
                     string article = (string)w.Cells[i, 3].Value;
                     string name = (string)w.Cells[i, 5].Value;
                     double price = (double)w.Cells[i, 9].Value;
@@ -214,7 +215,7 @@ namespace W_Motors
                         //обновить цену
                     }
                 }
-                if(countTovars == 1000)
+                if(countTovars == 500)
                 {
                     cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
                     UploadCSVInNethoise(cookie);
@@ -290,7 +291,7 @@ namespace W_Motors
                 otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
             }
 
-            name = name.Replace("\"", "").Replace("\r", "").Replace("\n", "");
+            name = name.Replace("\"", "").Replace("\r", "").Replace("\n", "").Replace("/", "_");
 
             string razdel = "";
             string miniText = minitextTemplate;
@@ -314,6 +315,7 @@ namespace W_Motors
                 price = priceWW.ToString();
             }
 
+            string oldArticle = article;
             article = "WM_" + article;
             article = ReturnArticle(article);
 
@@ -323,9 +325,9 @@ namespace W_Motors
             string titleText = titleTextTemplate;
             string keywordsText = keywordsTextTemplate;
 
-            titleText = ReplaceSEO("title", titleText, name, article.Replace(";", " "));
-            descriptionText = ReplaceSEO("description", descriptionText, name, article);
-            keywordsText = ReplaceSEO("keywords", keywordsText, name, article);
+            titleText = ReplaceSEO("title", titleText, name, oldArticle.Replace(";", " "), article.Replace(";", " "));
+            descriptionText = ReplaceSEO("description", descriptionText, name, oldArticle, article);
+            keywordsText = ReplaceSEO("keywords", keywordsText, name, oldArticle, article);
 
             miniText = Replace(miniText, name, article);
             miniText = miniText.Remove(miniText.LastIndexOf("<p>"));
@@ -389,7 +391,7 @@ namespace W_Motors
 
         private string ReturnArticle(string article)
         {
-            article = article.Replace("!", "_").Replace("@", "_").Replace("#", "_").Replace("$", "_").Replace("%", "_").Replace("^", "_").Replace("&", "_").Replace("*", "_").Replace("(", "_").Replace(")", "_").Replace("-", "_").Replace("+", "_").Replace("=", "_").Replace("/", "_").Replace("\\", "_").Replace("---", "_").Replace("___", "_").Replace("__", "_");
+            article = article.Replace("!", "_").Replace("@", "_").Replace("#", "_").Replace("$", "_").Replace("%", "_").Replace("^", "_").Replace("&", "_").Replace("*", "_").Replace("(", "_").Replace(")", "_").Replace("-", "_").Replace("+", "_").Replace("=", "_").Replace("/", "_").Replace("\\", "_").Replace("---", "_").Replace("___", "_").Replace("__", "_").Replace("|", "");
 
             return article;
         }
@@ -626,9 +628,9 @@ namespace W_Motors
             return otv;
         }
 
-        private string ReplaceSEO(string nameSEO, string text, string nameTovar, string article)
+        private string ReplaceSEO(string nameSEO, string text, string nameTovar, string oldArticle, string article)
         {
-            text = text.Replace("НАЗВАНИЕ", nameTovar).Replace("АРТИКУЛ", article);
+            text = text.Replace("НАЗВАНИЕ", nameTovar).Replace("АРТИКУЛ", oldArticle + ";" + article);
 
             switch (nameSEO)
             {
