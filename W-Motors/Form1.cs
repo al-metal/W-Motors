@@ -3,18 +3,14 @@ using OfficeOpenXml;
 using RacerMotors;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Формирование_ЧПУ;
+using NehouseLibrary;
 
 namespace W_Motors
 {
@@ -22,7 +18,7 @@ namespace W_Motors
     {
         Thread forms;
 
-        nethouse nethouse = new nethouse();
+        NehouseLibrary nehouseLibrary = new NehouseLibrary();
         WebClient webClient = new WebClient();
         httpRequest httprequest = new httpRequest();
         FileEdit files = new FileEdit();
@@ -36,6 +32,7 @@ namespace W_Motors
         string razdelCSV = "";
         string boldOpen = "<span style=\"\"font-weight: bold; font-weight: bold; \"\">";
         string boldClose = "</span>";
+        CookieContainer cookieWW;
 
         List<string> newProduct = new List<string>();
 
@@ -179,9 +176,10 @@ namespace W_Motors
             ExcelPackage p = new ExcelPackage(file);
             ExcelWorksheet w = p.Workbook.Worksheets[1];
             int q = w.Dimension.Rows;
+            cookieWW = httprequest.webCookie("http://w-motors.ru/");
             for (int i = 9; q > i; i++)
             {
-                
+
                 if (w.Cells[i, 3].Value == null && w.Cells[i, 2].Value == null)
                 {
                     i++;
@@ -195,10 +193,32 @@ namespace W_Motors
                 }
                 else
                 {
-                    if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == "Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" || razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == "ЛАМПЫ")
+                    if (razdelCSV == "Авто" || razdelCSV == "Боковой прицеп" || razdelCSV == "Велосипед ЗиП" || razdelCSV == "Бензопила, мотокоса" || razdelCSV == "Зимние виды товаров" || razdelCSV == "Охота, Рыбалка, Туризм" || razdelCSV == "Сварочное оборудование" || razdelCSV == "Станки деревообрабатывающие" || razdelCSV == "Прочие товары (автохимия, зарядники, инструмент, литература, масла, наклейки)" || razdelCSV == "Мототехника, Снегоходы, Прицепы, Мотоблоки" || razdelCSV == "Мотоодежда, экипировка" || razdelCSV == "Шлемы" || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "1 ТЕХНИКА: Мотоциклы, Снегоходы, Прицепы, Мотоблоки, Снегоуборщики"
+                        || razdelCSV == "Бензо Генераторы, Мотопомпы, Компрессоры, Насосные станции"
+                        || razdelCSV == "Бензопила, мотокоса"
+                        || razdelCSV == "Велосипеды в сборе,  велоЗиП"
+                        || razdelCSV == "Зимние виды товаров"
+                        || razdelCSV == "Мотоодежда, экипировка"
+                        || razdelCSV == "Охота, Рыбалка, Туризм, Одежда, Обувь"
+                        || razdelCSV == "Сварочное оборудование"
+                        || razdelCSV == "Станки деревообрабатывающие"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ"
+                        || razdelCSV == "ЛАМПЫ")
                         continue;
 
-                    countTovars++;
+
                     string article = (string)w.Cells[i, 3].Value;
                     string name = (string)w.Cells[i, 5].Value;
                     double price = (double)w.Cells[i, 9].Value;
@@ -208,18 +228,22 @@ namespace W_Motors
                     string resultSearch = SearchInBike18(tovarWW);
                     if (resultSearch == null || resultSearch == "")
                     {
-                        WriteTovarInCSV(tovarWW);
+                        //WriteTovarInCSV(tovarWW);
+                        countTovars++;
                     }
                     else
                     {
+                        UpdatePrice(cookie, resultSearch, tovarWW);
                         //обновить цену
                     }
                 }
-                if(countTovars == 500)
+                if (countTovars == 40000)
                 {
                     cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
                     UploadCSVInNethoise(cookie);
                     countTovars = 0;
+                    File.Delete("naSite.csv");
+                    newProduct = newList();
                 }
             }
 
@@ -227,6 +251,22 @@ namespace W_Motors
             UploadCSVInNethoise(cookie);
 
             ControlsFormEnabledTrue();
+        }
+
+        private void UpdatePrice(CookieContainer cookie, string resultSearch, List<string> tovarWW)
+        {
+            string[] products = resultSearch.Split(';');
+            foreach(string ss in products)
+            {
+                if (ss == "")
+                    continue;
+                List<string> listProduct = nethouse.GetProductList(cookie, ss);
+                listProduct[9] = tovarWW[2];
+                nethouse.SaveTovar(cookie, listProduct);
+
+
+
+            }
         }
 
         private void UploadCSVInNethoise(CookieContainer cookie)
@@ -277,65 +317,76 @@ namespace W_Motors
         {
             List<string> tovarWW = new List<string>();
 
-            CookieContainer cookieWW = httprequest.webCookie("http://w-motors.ru/");
-            string otv = getRequestEncod(cookieWW, "http://w-motors.ru/search/?q=" + name + "&amp;s=%CF%EE%E8%F1%EA", name);
-            string urlTovarWW = new Regex("(?<=a href=\")/catalog[\\w\\W]*?(?=\">)").Match(otv).ToString();
-            string nameTovarWW = new Regex("(?<=\">)<b>[\\w\\W]*?(?=</td>)").Match(otv).ToString();
-            nameTovarWW = nameTovarWW.Replace("<b>", "").Replace("</b>", "").Replace("&quot;", "\"");
-            if (name == nameTovarWW)
-            {
-                otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
-            }
-            else
-            {
-                otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
-            }
 
-            name = name.Replace("\"", "").Replace("\r", "").Replace("\n", "").Replace("/", "_");
-
+            string price = "";
             string razdel = "";
-            string miniText = minitextTemplate;
-            string fullText = fullTextTemplate;
-            razdel = ReturnRazdel();
+            string slug = "";
+            string titleText = "";
+            string descriptionText = "";
+            string keywordsText = "";
+            string miniText = "";
+            string fullText = "";
 
-            descriptionTovarWW = "";
-            descriptionTovarWW = new Regex("(?<=<div class=\"product-detail-text\">)[\\w\\W]*?(?=</div>)").Match(otv).ToString();
-            MatchCollection ampersant = new Regex("&.*?;").Matches(descriptionTovarWW);
-            foreach (Match str in ampersant)
+            string otv = getRequestEncod(cookieWW, "http://w-motors.ru/search/?q=" + name + "&amp;s=%CF%EE%E8%F1%EA", name);
+            if (otv != "err")
             {
-                string s = str.ToString();
-                descriptionTovarWW = descriptionTovarWW.Replace(s, "").Replace("\"", "");
-            }
-            descriptionTovarWW = descriptionTovarWW.Replace("\n", "").Replace("\t", "");
+                string urlTovarWW = new Regex("(?<=a href=\")/catalog[\\w\\W]*?(?=\">)").Match(otv).ToString();
+                string nameTovarWW = new Regex("(?<=\">)<b>[\\w\\W]*?(?=</td>)").Match(otv).ToString();
+                nameTovarWW = nameTovarWW.Replace("<b>", "").Replace("</b>", "").Replace("&quot;", "\"");
+                if (name == nameTovarWW)
+                {
+                    otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+                }
+                else
+                {
+                    otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+                }
 
-            string price = ReturnPrice(name, article, otv);
+                name = name.Replace("\"", "").Replace("\r", "").Replace("\n", "").Replace("/", "_");
 
-            if(price == "")
-            {
-                price = priceWW.ToString();
-            }
+                miniText = minitextTemplate;
+                fullText = fullTextTemplate;
+                razdel = ReturnRazdel();
 
-            string oldArticle = article;
-            article = "WM_" + article;
-            article = ReturnArticle(article);
+                descriptionTovarWW = "";
+                descriptionTovarWW = new Regex("(?<=<div class=\"product-detail-text\">)[\\w\\W]*?(?=</div>)").Match(otv).ToString();
+                MatchCollection ampersant = new Regex("&.*?;").Matches(descriptionTovarWW);
+                foreach (Match str in ampersant)
+                {
+                    string s = str.ToString();
+                    descriptionTovarWW = descriptionTovarWW.Replace(s, "").Replace("\"", "");
+                }
+                descriptionTovarWW = descriptionTovarWW.Replace("\n", "").Replace("\t", "");
 
-            string slug = chpu.vozvr(name);
+                price = ReturnPrice(name, article, otv);
 
-            string descriptionText = descriptionTextTemplate;
-            string titleText = titleTextTemplate;
-            string keywordsText = keywordsTextTemplate;
+                if (price == "")
+                {
+                    price = priceWW.ToString();
+                }
 
-            titleText = ReplaceSEO("title", titleText, name, oldArticle.Replace(";", " "), article.Replace(";", " "));
-            descriptionText = ReplaceSEO("description", descriptionText, name, oldArticle, article);
-            keywordsText = ReplaceSEO("keywords", keywordsText, name, oldArticle, article);
+                string oldArticle = article;
+                article = "WM_" + article;
+                article = ReturnArticle(article);
 
-            miniText = Replace(miniText, name, article);
-            miniText = miniText.Remove(miniText.LastIndexOf("<p>"));
+                slug = chpu.vozvr(name);
 
-            fullText = Replace(fullText, name, article);
-            fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
-            if(descriptionTovarWW != "\n\t" && descriptionTovarWW != "" && !descriptionTovarWW.Contains("https://") && !descriptionTovarWW.Contains("http://"))
-                fullText = "<p>" + descriptionTovarWW + "</p><p></p>" + fullText;
+                descriptionText = descriptionTextTemplate;
+                titleText = titleTextTemplate;
+                keywordsText = keywordsTextTemplate;
+
+                titleText = ReplaceSEO("title", titleText, name, oldArticle.Replace(";", " "), article.Replace(";", " "));
+                descriptionText = ReplaceSEO("description", descriptionText, name, oldArticle, article);
+                keywordsText = ReplaceSEO("keywords", keywordsText, name, oldArticle, article);
+
+                miniText = Replace(miniText, name, article);
+                miniText = miniText.Remove(miniText.LastIndexOf("<p>"));
+
+                fullText = Replace(fullText, name, article);
+                fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
+                if (descriptionTovarWW != "\n\t" && descriptionTovarWW != "" && !descriptionTovarWW.Contains("https://") && !descriptionTovarWW.Contains("http://"))
+                    fullText = "<p>" + descriptionTovarWW + "</p><p></p>" + fullText;
+            }            
 
             tovarWW.Add(name);
             tovarWW.Add(article);
@@ -607,23 +658,31 @@ namespace W_Motors
         public string getRequestEncod(CookieContainer cookie, string url, string name)
         {
             string otv = "";
-            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
-            req.Accept = "*/*";
-            req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";
-            req.Method = "POST";
-            req.ContentType = "application/x-www-form-urlencoded";
-            req.CookieContainer = cookie;
-            string request = "ajax_call=y&INPUT_ID=title-search-input&q=" + name;
+            try
+            {
 
-            byte[] ms = System.Text.Encoding.GetEncoding("utf-8").GetBytes(request);
-            req.ContentLength = ms.Length;
-            Stream stre = req.GetRequestStream();
-            stre.Write(ms, 0, ms.Length);
-            stre.Close();
-            HttpWebResponse res1 = (HttpWebResponse)req.GetResponse();
-            StreamReader ressr1 = new StreamReader(res1.GetResponseStream(), Encoding.GetEncoding(1251));
-            otv = ressr1.ReadToEnd();
-            res1.Close();
+                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
+                req.Accept = "*/*";
+                req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";
+                req.Method = "POST";
+                req.ContentType = "application/x-www-form-urlencoded";
+                req.CookieContainer = cookie;
+                string request = "ajax_call=y&INPUT_ID=title-search-input&q=" + name;
+
+                byte[] ms = System.Text.Encoding.GetEncoding("utf-8").GetBytes(request);
+                req.ContentLength = ms.Length;
+                Stream stre = req.GetRequestStream();
+                stre.Write(ms, 0, ms.Length);
+                stre.Close();
+                HttpWebResponse res1 = (HttpWebResponse)req.GetResponse();
+                StreamReader ressr1 = new StreamReader(res1.GetResponseStream(), Encoding.GetEncoding(1251));
+                otv = ressr1.ReadToEnd();
+                res1.Close();
+            }
+            catch
+            {
+                otv = "err";
+            }
 
             return otv;
         }

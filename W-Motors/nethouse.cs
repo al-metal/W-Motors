@@ -370,16 +370,29 @@ namespace Bike18
             string urlTovarBike = null;
 
             otv = webRequest.getRequest("http://bike18.ru/products/search/page/1?sort=0&balance=&categoryId=&min_cost=&max_cost=&text=" + searchString);
-            MatchCollection strUrlProd1 = new Regex("(?<=<a href=\").*(?=\"><div class=\"-relative item-image\")").Matches(otv);
+            MatchCollection urlsNamesProduct = new Regex("(?<=<div class=\"product-item__link\"><a ).*</a>").Matches(otv);
+            for (int t = 0; urlsNamesProduct.Count > t; t++)
+            {
+                string urlNameProduct = urlsNamesProduct[t].ToString();
+                string urlProduct = new Regex("(?<=href=\").*?(?=\">)").Match(urlNameProduct).ToString();
+                string nameProduct = new Regex("(?<=\">).*?(?=</a>)").Match(urlNameProduct).ToString();
+
+                if(name == nameProduct)
+                {
+                    return urlProduct;
+                }
+
+            }
+               /* MatchCollection strUrlProd1 = new Regex("(?<=<a href=\").*(?=\"><div class=\"-relative item-image\")").Matches(otv);
             for (int t = 0; strUrlProd1.Count > t; t++)
             {
                 string nameProduct1 = new Regex("(?<=<a href=\\\"" + strUrlProd1[t].ToString() + "\" >).*?(?=</a>)").Match(otv).ToString().Replace("&amp;quot;", "").Replace("&#039;", "'").Replace("&amp;gt;", ">").Replace("  ", " ").Trim();
-                if (name == nameProduct1)
-                {
+                //if (name == nameProduct1)
+                //{
                     urlTovarBike = strUrlProd1[t].ToString();
-                    break;
-                }
-            }
+                    //break;
+                //}
+            }*/
             return urlTovarBike;
         }
 
