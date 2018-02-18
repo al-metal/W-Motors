@@ -11,6 +11,8 @@ using System.Threading;
 using System.Windows.Forms;
 using Формирование_ЧПУ;
 using NehouseLibrary;
+using xNet;
+using xNet.Net;
 
 namespace W_Motors
 {
@@ -18,7 +20,9 @@ namespace W_Motors
     {
         Thread forms;
 
-        NehouseLibrary nehouseLibrary = new NehouseLibrary();
+        int numberStart;
+
+        NehouseLibrary.nethouse nethouse = new NehouseLibrary.nethouse();
         WebClient webClient = new WebClient();
         httpRequest httprequest = new httpRequest();
         FileEdit files = new FileEdit();
@@ -42,6 +46,7 @@ namespace W_Motors
         public Form1()
         {
             InitializeComponent();
+
             if (!Directory.Exists("files"))
             {
                 Directory.CreateDirectory("files");
@@ -149,7 +154,7 @@ namespace W_Motors
         {
             string l = tbLogin.Text;
             string p = tbPasswords.Text;
-            CookieContainer cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
+            CookieDictionary cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
             if (cookie.Count == 1)
             {
                 MessageBox.Show("Логин или пароль для сайта введены не верно", "Ошибка логина/пароля");
@@ -161,7 +166,7 @@ namespace W_Motors
 
         }
 
-        private void CreateCSV(CookieContainer cookie)
+        private void CreateCSV(CookieDictionary cookie)
         {
             ControlsFormEnabledFalse();
 
@@ -177,7 +182,7 @@ namespace W_Motors
             ExcelWorksheet w = p.Workbook.Worksheets[1];
             int q = w.Dimension.Rows;
             cookieWW = httprequest.webCookie("http://w-motors.ru/");
-            for (int i = 9; q > i; i++)
+            for (int i = numberStart; q > i; i++)
             {
 
                 if (w.Cells[i, 3].Value == null && w.Cells[i, 2].Value == null)
@@ -245,7 +250,11 @@ namespace W_Motors
                     File.Delete("naSite.csv");
                     newProduct = newList();
                 }
+
+                SaveNumberStart(i);
             }
+
+            SaveNumberStart(9);
 
             cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
             UploadCSVInNethoise(cookie);
@@ -253,7 +262,13 @@ namespace W_Motors
             ControlsFormEnabledTrue();
         }
 
-        private void UpdatePrice(CookieContainer cookie, string resultSearch, List<string> tovarWW)
+        private static void SaveNumberStart(int number)
+        {
+            Properties.Settings.Default.numberStart = number;
+            Properties.Settings.Default.Save();
+        }
+
+        private void UpdatePrice(CookieDictionary cookie, string resultSearch, List<string> tovarWW)
         {
             string[] products = resultSearch.Split(';');
             foreach(string ss in products)
@@ -261,19 +276,18 @@ namespace W_Motors
                 if (ss == "")
                     continue;
                 List<string> listProduct = nethouse.GetProductList(cookie, ss);
+                if (listProduct == null)
+                    continue;
                 listProduct[9] = tovarWW[2];
                 nethouse.SaveTovar(cookie, listProduct);
-
-
-
             }
         }
 
-        private void UploadCSVInNethoise(CookieContainer cookie)
+        private void UploadCSVInNethoise(CookieDictionary cookie)
         {
-            string[] naSite1 = File.ReadAllLines("naSite.csv", Encoding.GetEncoding(1251));
+            /*string[] naSite1 = File.ReadAllLines("naSite.csv", Encoding.GetEncoding(1251));
             if (naSite1.Length > 1)
-                nethouse.UploadCSVNethouse(cookie, "naSite.csv");
+                nethouse.(cookie, "naSite.csv");*/
         }
 
         private void WriteTovarInCSV(List<string> tovarMotoPiter)
@@ -335,11 +349,11 @@ namespace W_Motors
                 nameTovarWW = nameTovarWW.Replace("<b>", "").Replace("</b>", "").Replace("&quot;", "\"");
                 if (name == nameTovarWW)
                 {
-                    otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+                    otv = nethouse.getRequestEncoding1251("http://w-motors.ru" + urlTovarWW);
                 }
                 else
                 {
-                    otv = httprequest.getRequestEncod("http://w-motors.ru" + urlTovarWW);
+                    otv = nethouse.getRequestEncoding1251("http://w-motors.ru" + urlTovarWW);
                 }
 
                 name = name.Replace("\"", "").Replace("\r", "").Replace("\n", "").Replace("/", "_");
@@ -627,6 +641,13 @@ namespace W_Motors
         {
             tbLogin.Text = Properties.Settings.Default.login;
             tbPasswords.Text = Properties.Settings.Default.password;
+
+            numberStart = Properties.Settings.Default.numberStart;
+
+            if (numberStart == 0)
+            {
+                numberStart = 9;
+            }
         }
 
         private List<string> newList()
