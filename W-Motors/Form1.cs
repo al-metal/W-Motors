@@ -177,6 +177,11 @@ namespace W_Motors
 
             int countTovars = 0;
 
+            FileInfo file2 = new FileInfo("Каталог.xlsx");
+            ExcelPackage p2 = new ExcelPackage(file2);
+            ExcelWorksheet w2 = p2.Workbook.Worksheets[1];
+            int q2 = w2.Dimension.Rows;
+
             FileInfo file = new FileInfo(fileUrls);
             ExcelPackage p = new ExcelPackage(file);
             ExcelWorksheet w = p.Workbook.Worksheets[1];
@@ -207,28 +212,86 @@ namespace W_Motors
                         || razdelCSV == "Мотоодежда, экипировка"
                         || razdelCSV == "Охота, Рыбалка, Туризм, Одежда, Обувь"
                         || razdelCSV == "Сварочное оборудование"
-                        || razdelCSV == "Станки деревообрабатывающие"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ"
-                        || razdelCSV == "ЛАМПЫ")
+                        || razdelCSV == "Станки деревообрабатывающие")
                         continue;
 
 
                     string article = (string)w.Cells[i, 3].Value;
                     string name = (string)w.Cells[i, 5].Value;
-                    double price = (double)w.Cells[i, 9].Value;
+                    double price = (double)w.Cells[i, 10].Value;
+                    price = Math.Round(price + (price * 0.05));
+                    article = "WM_" + article;
 
-                    List<string> tovarWW = GetTovarWW(article, name, price);
+                    for (int j = 2; q2 > j; j++)
+                    {
+                        string articlePriceB18 = "";
+                        try
+                        {
+                            articlePriceB18 = (string)w2.Cells[j, 2].Value.ToString();
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                        if (articlePriceB18 == article)
+                        {
+                            double pricePriceB18 = (double)w2.Cells[j, 4].Value;
+                            if (pricePriceB18 != price)
+                            {
+                                string id = (string)w2.Cells[j, 1].Value.ToString();
+                                string namePriceB18 = (string)w2.Cells[j, 3].Value.ToString();
+                                string priceSales = "";
+                                string tovarsPriceB18 = "";
+                                string reklamaPriceB18 = "";
+                                try
+                                {
+                                    priceSales = (string)w2.Cells[j, 5].Value.ToString();
+                                    tovarsPriceB18 = (string)w2.Cells[j, 16].Value.ToString();
+                                    reklamaPriceB18 = (string)w2.Cells[j, 2].Value.ToString();
+                                }
+                                catch
+                                {
+
+                                }
+                                string razdelPriceB18 = (string)w2.Cells[j, 6].Value.ToString();
+                                string nalichiePriceB18 = (string)w2.Cells[j, 7].Value.ToString();
+                                string postavkaPriceB18 = (string)w2.Cells[j, 8].Value.ToString();
+                                string srokPriceB18 = (string)w2.Cells[j, 9].Value.ToString();
+                                string miniTextPriceB18 = (string)w2.Cells[j, 10].Value.ToString();
+                                string fultextPriceB18 = (string)w2.Cells[j, 11].Value.ToString();
+                                string titlePriceB18 = (string)w2.Cells[j, 12].Value.ToString();
+                                string descriptionPriceB18 = (string)w2.Cells[j, 13].Value.ToString();
+                                string keywordsPriceB18 = (string)w2.Cells[j, 14].Value.ToString();
+                                string slugPriceB18 = (string)w2.Cells[j, 15].Value.ToString();
+                                
+                                newProduct = new List<string>();
+                                newProduct.Add("\"" + id + "\""); //id
+                                newProduct.Add("\"" + articlePriceB18 + "\""); //артикул
+                                newProduct.Add("\"" + namePriceB18 + "\"");  //название
+                                newProduct.Add("\"" + price.ToString() + "\""); //стоимость
+                                newProduct.Add("\"" + priceSales + "\""); //со скидкой
+                                newProduct.Add("\"" + razdelPriceB18 + "\""); //раздел товара
+                                newProduct.Add("\"" + "100" + "\""); //в наличии
+                                newProduct.Add("\"" + "0" + "\"");//поставка
+                                newProduct.Add("\"" + "1" + "\"");//срок поставки
+                                newProduct.Add("\"" + miniTextPriceB18.Replace("\"", "\"\"") + "\"");//краткий текст
+                                newProduct.Add("\"" + fultextPriceB18.Replace("\"", "\"\"") + "\"");//полностью текст
+                                newProduct.Add("\"" + titlePriceB18.Replace("\"", "\"\"") + "\""); //заголовок страницы
+                                newProduct.Add("\"" + descriptionPriceB18.Replace("\"", "\"\"") + "\""); //описание
+                                newProduct.Add("\"" + keywordsPriceB18.Replace("\"", "\"\"") + "\"");//ключевые слова
+                                newProduct.Add("\"" + slugPriceB18 + "\""); //ЧПУ
+                                newProduct.Add("\"" + tovarsPriceB18 + "\""); //с этим товаром покупают
+                                newProduct.Add("\"" + reklamaPriceB18 + "\"");   //рекламные метки
+                                newProduct.Add("\"" + "1" + "\"");  //показывать
+                                newProduct.Add("\"" + "0" + "\""); //удалить
+                                files.fileWriterCSV(newProduct, "naSite");
+                            }
+                        }
+
+                    }
+
+
+                    /*List<string> tovarWW = GetTovarWW(article, name, price);
 
                     string resultSearch = SearchInBike18(tovarWW);
                     if (resultSearch == null || resultSearch == "")
@@ -240,16 +303,16 @@ namespace W_Motors
                     {
                         UpdatePrice(cookie, resultSearch, tovarWW);
                         //обновить цену
-                    }
+                    }*/
                 }
-                if (countTovars == 40000)
+                /*if (countTovars == 40000)
                 {
                     cookie = nethouse.CookieNethouse(tbLogin.Text, tbPasswords.Text);
                     UploadCSVInNethoise(cookie);
                     countTovars = 0;
                     File.Delete("naSite.csv");
                     newProduct = newList();
-                }
+                }*/
 
                 SaveNumberStart(i);
             }
@@ -271,7 +334,7 @@ namespace W_Motors
         private void UpdatePrice(CookieDictionary cookie, string resultSearch, List<string> tovarWW)
         {
             string[] products = resultSearch.Split(';');
-            foreach(string ss in products)
+            foreach (string ss in products)
             {
                 if (ss == "")
                     continue;
@@ -400,7 +463,7 @@ namespace W_Motors
                 fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
                 if (descriptionTovarWW != "\n\t" && descriptionTovarWW != "" && !descriptionTovarWW.Contains("https://") && !descriptionTovarWW.Contains("http://"))
                     fullText = "<p>" + descriptionTovarWW + "</p><p></p>" + fullText;
-            }            
+            }
 
             tovarWW.Add(name);
             tovarWW.Add(article);

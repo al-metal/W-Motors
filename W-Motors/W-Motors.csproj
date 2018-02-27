@@ -36,7 +36,7 @@
       <HintPath>.\EPPlus.dll</HintPath>
     </Reference>
     <Reference Include="NehouseLibrary">
-      <HintPath>..\..\NehouseLibrary\NehouseLibrary\bin\Debug\NehouseLibrary.dll</HintPath>
+      <HintPath>..\..\..\github\NehouseLibrary\bin\Debug\NehouseLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -50,7 +50,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="xNet">
-      <HintPath>..\..\NehouseLibrary\NehouseLibrary\bin\Debug\xNet.dll</HintPath>
+      <HintPath>..\..\..\github\xNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
